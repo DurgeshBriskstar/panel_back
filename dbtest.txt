@@ -1,0 +1,48 @@
+
+# Category DB
+1. id
+2. uid
+3. title
+4. slug
+4. type
+5. image
+6. show_in_nav
+7. order_in_nav
+8. short_desc
+9. description
+9. status
+10. metaKeywords
+11. meta_title
+12. meta_desc
+13. created_at
+14. created_by
+15. updated_at
+16. updated_by
+17. deleted_at
+18. deleted_at
+
+
+# Blog DB
+1. id
+2. uid
+3. title
+4. slug
+5. image
+6. category_slug : [cat_1, cat_2]
+7. city_slug : [city_1, city_2]
+8. type : (blog/news)
+9. short_desc
+10. long_desc
+11. author
+12. source
+13. status
+14. publish_date
+15. metaKeywords
+16. meta_title
+17. meta_desc
+18. created_at
+19. created_by
+20. updated_at
+21. updated_by
+22. deleted_at
+23. deleted_at
