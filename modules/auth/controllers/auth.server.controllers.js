@@ -62,6 +62,7 @@ const SignIn = async (req, res) => {
                     firstname: user[0]?.firstname,
                     lastname: user[0]?.lastname,
                     email: user[0]?.email,
+                    role: user[0]?.role,
                 }, JWT_KEY, { expiresIn: "2h" });
                 let withoutPassword = user[0].toObject();
                 delete withoutPassword.password;

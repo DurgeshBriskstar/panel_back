@@ -4,7 +4,7 @@ const firstUserSetup = () => {
         "lastName": "Admin",
         "email": "admin@test.com",
         "password": "Admin@123",
-        "role": "SuperAdmin",
+        "role": "admin",
     }
     return userInfo;
 }

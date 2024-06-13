@@ -20,8 +20,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-Router.get('/get/:id?', checkRole(["SuperAdmin", "Admin"]), blogController.Get);
-Router.post('/form/:id?', checkRole(["SuperAdmin", "Admin"]), upload.single('image'), blogController.Form);
-Router.delete('/delete/:id?', checkRole(["SuperAdmin", "Admin"]), blogController.Delete);
+Router.get('/get/:id?', checkRole(["admin", "branch"]), blogController.Get);
+Router.post('/form/:id?', checkRole(["admin", "branch"]), upload.single('image'), blogController.Form);
+Router.delete('/delete/:id?', checkRole(["admin", "branch"]), blogController.Delete);
 
 module.exports = Router;
