@@ -9,7 +9,9 @@ const Info = async (req, res) => {
                 return sendResponse(res, false, 400, {}, "User not found!");
             }
             else {
-                return sendResponse(res, true, 200, user[0], "Information get successfully!");
+                let withoutPassword = user[0].toObject();
+                delete withoutPassword.password;
+                return sendResponse(res, true, 200, withoutPassword, "Information get successfully!");
             }
         }
         return sendResponse(res, false, 400, {}, "Something went wrong, Please try again with correct credentials!");
