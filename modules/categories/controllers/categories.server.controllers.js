@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { sendResponse, convertToSlug, generateRandomUid } = require("../../helper/common");
-const { STATUS_DELETED } = require("../../helper/flags");
+const { STATUS_DELETED, STATUS_INACTIVE, STATUS_ACTIVE } = require("../../helper/flags");
 const { categoryFormValidations } = require("../../helper/validations");
 const categoryModel = require("../models/categories.server.models");
 const { convertUTCtoLocal } = require("../../../helper/common");
@@ -34,7 +34,7 @@ const Get = async (req, res) => {
 
     { $lookup: { from: 'users', localField: 'createdBy', foreignField: '_id', as: 'createdByUser' } },
     { $lookup: { from: 'users', localField: 'updatedBy', foreignField: '_id', as: 'updatedByUser' } },
-
+    { $sort: sortingColumn },
     {
       $project: {
         uid: "$uid",
@@ -88,6 +88,7 @@ const Get = async (req, res) => {
 const Form = async (req, res) => {
   try {
     if (!req?.body) return sendResponse(res, false, 400, {}, "No data provided!");
+    const formFile = req.file;
     const formData = req.body;
     const formParams = req.params;
     const recordId = formParams.id || new mongoose.Types.ObjectId;
@@ -114,8 +115,8 @@ const Form = async (req, res) => {
       updatedBy: req?.user?.id,
     };
 
-    if (req.file) {
-      const image = req.file;
+    if (formFile) {
+      const image = formFile;
       const imagePath = 'uploads/categories/' + image.filename;
       record.image = {
         data: image.buffer,
@@ -154,6 +155,31 @@ const Form = async (req, res) => {
   }
 };
 
+const UpdateStatus = async (req, res) => {
+  const recordId = req?.params?.id || null;
+
+  if (recordId) {
+    const record = {
+      status: req?.body?.status === STATUS_ACTIVE ? STATUS_INACTIVE : STATUS_ACTIVE,
+      updatedAtAt: new Date(),
+      updatedBy: req?.user?.id,
+    };
+    const updatedCategory = await categoryModel.findByIdAndUpdate(
+      recordId,
+      { $set: record },
+      { new: true }
+    );
+    return sendResponse(res, true, 200, updatedCategory, "Status updated successfully!");
+  }
+  return sendResponse(
+    res,
+    false,
+    400,
+    {},
+    "No record selected, Please try again!"
+  );
+};
+
 const Delete = async (req, res) => {
   const recordId = req?.params?.id || null;
   if (recordId) {
@@ -182,4 +208,5 @@ module.exports = {
   Get,
   Form,
   Delete,
+  UpdateStatus,
 };
