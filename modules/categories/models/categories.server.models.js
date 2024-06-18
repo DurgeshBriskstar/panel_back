@@ -13,7 +13,7 @@ const categorySchema = new mongoose.Schema(
         description: { type: String },
         status: { type: Number, comment: "0 Inactive, 1 Active, 2 Deleted" },
 
-        metaKeywords: { type: String },
+        metaKeywords: { type: Array },
         metaTitle: { type: String },
         metaDesc: { type: String },
 

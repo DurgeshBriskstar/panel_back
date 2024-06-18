@@ -104,7 +104,7 @@ const Form = async (req, res) => {
       orderInNav: formData.orderInNav || null,
       shortDesc: formData.shortDesc || "",
       description: formData.description || "",
-      status: formData.status || 0,
+      status: formData.active ? 1 : 0,
 
       metaKeywords: formData.metaKeywords,
       metaTitle: formData.metaTitle,
