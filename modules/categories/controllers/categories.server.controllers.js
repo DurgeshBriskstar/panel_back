@@ -1,9 +1,12 @@
 const mongoose = require("mongoose");
+const fs = require('fs');
+const path = require('path');
 const { sendResponse, convertToSlug, generateRandomUid } = require("../../helper/common");
 const { STATUS_DELETED, STATUS_INACTIVE, STATUS_ACTIVE } = require("../../helper/flags");
 const { categoryFormValidations } = require("../../helper/validations");
 const categoryModel = require("../models/categories.server.models");
-const { convertUTCtoLocal } = require("../../../helper/common");
+const { convertUTCtoLocal, ensureDirectoryExistence, saveFileAndContinue } = require("../../../helper/common");
+const { categoryPath } = require("../../../helper/paths");
 
 const Get = async (req, res) => {
   const { id: recordId } = req.params || null;
@@ -41,7 +44,8 @@ const Get = async (req, res) => {
         title: "$title",
         slug: "$slug",
         type: "$type",
-        image: { $concat: ["http://localhost:5000/", "$image.path"] },
+        image: "$image",
+        imageUrl: { $concat: [categoryPath.get, '/', "$image"] },
         showInNav: "$showInNav",
         orderInNav: "$orderInNav",
         shortDesc: "$shortDesc",
@@ -115,14 +119,20 @@ const Form = async (req, res) => {
       updatedBy: req?.user?.id,
     };
 
-    if (formFile) {
-      const image = formFile;
-      const imagePath = 'uploads/categories/' + image.filename;
-      record.image = {
-        data: image.buffer,
-        contentType: image.mimetype,
-        path: imagePath
-      };
+    if (formData?.image) {
+      const matches = formData?.image.match(/^data:(.+);base64,(.+)$/);
+      const ext = matches[1].split('/')[1];
+      const data = matches[2];
+      const buffer = Buffer.from(data, 'base64');
+      const imageName = `${Date.now()}.${ext}`;
+      const imagePath = path.join(categoryPath.upload, imageName);
+
+      // Ensure directory exists
+      ensureDirectoryExistence(imagePath);
+      const fileStatus = await saveFileAndContinue(imagePath, buffer);
+      if (fileStatus) {
+        record.image = imageName;
+      }
     }
 
     if (newRecord) {

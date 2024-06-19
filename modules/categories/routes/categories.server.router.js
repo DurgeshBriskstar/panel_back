@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 Router.post('/get/:id?', checkRole(["admin", "branch"]), categoryController.Get);
-Router.post('/form/:id?', checkRole(["admin", "branch"]), upload.single('image'), categoryController.Form);
+Router.post('/form/:id?', checkRole(["admin", "branch"]), categoryController.Form);
 Router.post('/status/:id?', checkRole(["admin", "branch"]), categoryController.UpdateStatus);
 Router.delete('/delete/:id?', checkRole(["admin", "branch"]), categoryController.Delete);
 
