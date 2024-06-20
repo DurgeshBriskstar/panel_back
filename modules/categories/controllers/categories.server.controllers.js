@@ -133,6 +133,8 @@ const Form = async (req, res) => {
       if (fileStatus) {
         record.image = imageName;
       }
+    } else {
+      record.image = "";
     }
 
     if (newRecord) {
