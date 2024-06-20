@@ -7,6 +7,7 @@ const categorySchema = new mongoose.Schema(
         slug: { type: String },
         type: { type: String, comment: "city/category" },
         image: { type: String },
+        imageUrl: { type: String },
         showInNav: { type: Boolean },
         orderInNav: { type: Number },
         shortDesc: { type: String },

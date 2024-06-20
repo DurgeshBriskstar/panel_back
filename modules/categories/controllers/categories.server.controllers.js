@@ -45,7 +45,7 @@ const Get = async (req, res) => {
         slug: "$slug",
         type: "$type",
         image: "$image",
-        imageUrl: { $concat: [categoryPath.get, '/', "$image"] },
+        imageUrl: "$imageUrl",
         showInNav: "$showInNav",
         orderInNav: "$orderInNav",
         shortDesc: "$shortDesc",
@@ -120,21 +120,25 @@ const Form = async (req, res) => {
     };
 
     if (formData?.image) {
-      const matches = formData?.image.match(/^data:(.+);base64,(.+)$/);
-      const ext = matches[1].split('/')[1];
-      const data = matches[2];
-      const buffer = Buffer.from(data, 'base64');
-      const imageName = `${Date.now()}.${ext}`;
-      const imagePath = path.join(categoryPath.upload, imageName);
+      const matches = formData?.image?.match(/^data:(.+);base64,(.+)$/);
+      if (matches) {
+        const ext = matches[1].split('/')[1];
+        const data = matches[2];
+        const buffer = Buffer.from(data, 'base64');
+        const imageName = `${Date.now()}.${ext}`;
+        const imagePath = path.join(categoryPath.upload, imageName);
 
-      // Ensure directory exists
-      ensureDirectoryExistence(imagePath);
-      const fileStatus = await saveFileAndContinue(imagePath, buffer);
-      if (fileStatus) {
-        record.image = imageName;
+        // Ensure directory exists
+        ensureDirectoryExistence(imagePath);
+        const fileStatus = await saveFileAndContinue(imagePath, buffer);
+        if (fileStatus) {
+          record.image = imageName;
+          record.imageUrl = `${categoryPath.get}/${imageName}`;
+        }
       }
     } else {
       record.image = "";
+      record.imageUrl = "";
     }
 
     if (newRecord) {
