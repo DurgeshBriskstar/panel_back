@@ -5,7 +5,8 @@ const blogSchema = new mongoose.Schema(
         uid: { type: String },
         title: { type: String },
         slug: { type: String },
-        image: { data: Buffer, contentType: String, path: String },
+        image: { type: String },
+        imageUrl: { type: String },
         categorySlug: { type: Array },
         citySlug: { type: Array },
         tags: { type: Array },
@@ -16,7 +17,7 @@ const blogSchema = new mongoose.Schema(
         source: { type: String },
         status: { type: Number, comment: "0 Inactive, 1 Active, 2 Deleted" },
 
-        metaKeywords: { type: String },
+        metaKeywords: { type: Array },
         metaTitle: { type: String },
         metaDesc: { type: String },
 

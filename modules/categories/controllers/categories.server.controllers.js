@@ -18,7 +18,7 @@ const Get = async (req, res) => {
   const filterByStatus = req.body.status || null;
   const skip = page * rowsPerPage;
 
-  const sortingColumn = orderBy === "createdAt" ? { "tracking.createdAt": order === 'desc' ? -1 : 1 } : { [orderBy]: order === 'desc' ? -1 : 1 };
+  const sortingColumn = { [orderBy]: order === 'desc' ? -1 : 1 };
 
   let matchQuery = {
     status: filterByStatus ? parseInt(filterByStatus) : { $ne: 2 },
@@ -92,7 +92,6 @@ const Get = async (req, res) => {
 const Form = async (req, res) => {
   try {
     if (!req?.body) return sendResponse(res, false, 400, {}, "No data provided!");
-    const formFile = req.file;
     const formData = req.body;
     const formParams = req.params;
     const recordId = formParams.id || new mongoose.Types.ObjectId;

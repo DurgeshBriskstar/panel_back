@@ -3,25 +3,8 @@ const Router = express.Router();
 const blogController = require("../controllers/blogs.server.controllers");
 const { checkRole } = require('../../helper/verifyToken');
 
-var multer = require('multer');
-const path = require('path');
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/blogs')
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const fileExtension = path.extname(file.originalname);
-        const fileName = 'bn-' + uniqueSuffix + fileExtension;
-        cb(null, fileName);
-    }
-});
-
-const upload = multer({ storage: storage });
-
-Router.get('/get/:id?', checkRole(["admin", "branch"]), blogController.Get);
-Router.post('/form/:id?', checkRole(["admin", "branch"]), upload.single('image'), blogController.Form);
+Router.post('/get/:id?', checkRole(["admin", "branch"]), blogController.Get);
+Router.post('/form/:id?', checkRole(["admin", "branch"]), blogController.Form);
 Router.delete('/delete/:id?', checkRole(["admin", "branch"]), blogController.Delete);
 
 module.exports = Router;

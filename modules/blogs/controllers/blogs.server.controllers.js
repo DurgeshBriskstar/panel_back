@@ -15,7 +15,7 @@ const Get = async (req, res) => {
     const filterByStatus = req.body.status || null;
     const skip = page * rowsPerPage;
 
-    const sortingColumn = orderBy === "createdAt" ? { "tracking.createdAt": order === 'desc' ? -1 : 1 } : { [orderBy]: order === 'desc' ? -1 : 1 };
+    const sortingColumn = { [orderBy]: order === 'desc' ? -1 : 1 };
 
     let matchQuery = {
         status: filterByStatus ? parseInt(filterByStatus) : { $ne: 2 },
@@ -34,16 +34,17 @@ const Get = async (req, res) => {
 
         { $lookup: { from: 'users', localField: 'createdBy', foreignField: '_id', as: 'createdByUser' } },
         { $lookup: { from: 'users', localField: 'updatedBy', foreignField: '_id', as: 'updatedByUser' } },
-
+        { $sort: sortingColumn },
         {
             $project: {
                 uid: "$uid",
                 title: "$title",
                 slug: "$slug",
+                type: "$type",
+                image: "$image",
+                imageUrl: "$imageUrl",
                 categorySlug: "$categorySlug",
                 citySlug: "$citySlug",
-                type: "$type",
-                image: { $concat: ["http://localhost:5000/", "$image.path"] },
                 shortDesc: "$shortDesc",
                 description: "$description",
                 tags: "$tags",
@@ -83,7 +84,7 @@ const Get = async (req, res) => {
         res,
         true,
         200,
-        { data: blogList, pagination: pagination },
+        blogList,
         "Records fetched successfully!"
     );
 };
@@ -123,14 +124,26 @@ const Form = async (req, res) => {
             updatedBy: req?.user?.id,
         }
 
-        if (req.file) {
-            const image = req.file;
-            const imagePath = 'uploads/blogs/' + image?.filename;
-            record.image = {
-                data: image?.buffer,
-                contentType: image?.mimetype,
-                path: imagePath
-            };
+        if (formData?.image) {
+            const matches = formData?.image?.match(/^data:(.+);base64,(.+)$/);
+            if (matches) {
+                const ext = matches[1].split('/')[1];
+                const data = matches[2];
+                const buffer = Buffer.from(data, 'base64');
+                const imageName = `${Date.now()}.${ext}`;
+                const imagePath = path.join(categoryPath.upload, imageName);
+
+                // Ensure directory exists
+                ensureDirectoryExistence(imagePath);
+                const fileStatus = await saveFileAndContinue(imagePath, buffer);
+                if (fileStatus) {
+                    record.image = imageName;
+                    record.imageUrl = `${categoryPath.get}/${imageName}`;
+                }
+            }
+        } else {
+            record.image = "";
+            record.imageUrl = "";
         }
 
         if (newRecord) {

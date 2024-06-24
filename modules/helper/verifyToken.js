@@ -9,7 +9,6 @@ const verifyToken = (req, res, next) => {
         return sendResponse(res, false, 401, {}, "Unauthorized: No token provided!");
     }
     const token = authorizationHeader.split(" ")[1];
-
     jwt.verify(token, JWT_KEY, (err, decoded) => {
         if (err) {
             return sendResponse(res, false, 401, {}, "Unauthorized: Token is invalid or expired!");
