@@ -176,7 +176,7 @@ const UpdateStatus = async (req, res) => {
   if (recordId) {
     const record = {
       status: req?.body?.status === STATUS_ACTIVE ? STATUS_INACTIVE : STATUS_ACTIVE,
-      updatedAtAt: new Date(),
+      updatedAt: new Date(),
       updatedBy: req?.user?.id,
     };
     const updatedCategory = await categoryModel.findByIdAndUpdate(

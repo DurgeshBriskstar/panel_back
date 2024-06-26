@@ -1,9 +1,12 @@
 const mongoose = require("mongoose");
+const fs = require('fs');
+const path = require('path');
 const { sendResponse, convertToSlug, generateRandomUid } = require("../../helper/common");
-const { STATUS_DELETED } = require("../../helper/flags");
+const { STATUS_DELETED, STATUS_ACTIVE, STATUS_INACTIVE } = require("../../helper/flags");
 const { blogFormValidations } = require("../../helper/validations");
 const blogModel = require("../models/blogs.server.models");
-const { convertUTCtoLocal } = require("../../../helper/common");
+const { convertUTCtoLocal, ensureDirectoryExistence, saveFileAndContinue } = require("../../../helper/common");
+const { blogPath } = require("../../../helper/paths");
 
 const Get = async (req, res) => {
     const { id: recordId } = req.params || null;
@@ -113,8 +116,8 @@ const Form = async (req, res) => {
             tags: formData?.tags || [],
             author: formData?.author || "",
             source: formData?.source || "",
-            status: formData.status || 0,
-            publishDate: "",
+            status: formData.active ? 1 : 0,
+            publishDate: new Date(formData.publishDate),
 
             metaKeywords: formData.metaKeywords,
             metaTitle: formData.metaTitle,
@@ -131,14 +134,14 @@ const Form = async (req, res) => {
                 const data = matches[2];
                 const buffer = Buffer.from(data, 'base64');
                 const imageName = `${Date.now()}.${ext}`;
-                const imagePath = path.join(categoryPath.upload, imageName);
+                const imagePath = path.join(blogPath.upload, imageName);
 
                 // Ensure directory exists
                 ensureDirectoryExistence(imagePath);
                 const fileStatus = await saveFileAndContinue(imagePath, buffer);
                 if (fileStatus) {
                     record.image = imageName;
-                    record.imageUrl = `${categoryPath.get}/${imageName}`;
+                    record.imageUrl = `${blogPath.get}/${imageName}`;
                 }
             }
         } else {
@@ -176,6 +179,31 @@ const Form = async (req, res) => {
     }
 };
 
+const UpdateStatus = async (req, res) => {
+    const recordId = req?.params?.id || null;
+
+    if (recordId) {
+        const record = {
+            status: req?.body?.status === STATUS_ACTIVE ? STATUS_INACTIVE : STATUS_ACTIVE,
+            updatedAt: new Date(),
+            updatedBy: req?.user?.id,
+        };
+        const updatedBlog = await blogModel.findByIdAndUpdate(
+            recordId,
+            { $set: record },
+            { new: true }
+        );
+        return sendResponse(res, true, 200, updatedBlog, "Status updated successfully!");
+    }
+    return sendResponse(
+        res,
+        false,
+        400,
+        {},
+        "No record selected, Please try again!"
+    );
+};
+
 const Delete = async (req, res) => {
     const recordId = req?.params?.id || null;
     if (recordId) {
@@ -200,8 +228,35 @@ const Delete = async (req, res) => {
     );
 };
 
+const uploadDescriptionImage = async (req, res) => {
+    if (!req?.body) return sendResponse(res, false, 400, {}, "No data provided!");
+    const formData = req?.body;
+    if (formData?.image) {
+        const matches = formData?.image?.match(/^data:(.+);base64,(.+)$/);
+        if (matches) {
+            const ext = matches[1].split('/')[1];
+            const data = matches[2];
+            const buffer = Buffer.from(data, 'base64');
+            const imageName = `${Date.now()}.${ext}`;
+            const imagePath = path.join(blogPath.uploadDesc, imageName);
+
+            // Ensure directory exists
+            ensureDirectoryExistence(imagePath);
+            const fileStatus = await saveFileAndContinue(imagePath, buffer);
+            if (fileStatus) {
+                const ImageUrl = `${blogPath.getDesc}/${imageName}`;
+                const message = `Image uploaded successfully`;
+                return sendResponse(res, true, 200, ImageUrl, message);
+            }
+        }
+    }
+    return sendResponse(res, false, 400, {}, "Something went wrong, Please try again!");
+}
+
 module.exports = {
     Get,
     Form,
+    UpdateStatus,
     Delete,
+    uploadDescriptionImage,
 };

@@ -8,6 +8,14 @@ const categoryPath = {
     get: `${baseUrl}/uploads/categories`
 };
 
+const blogPath = {
+    upload: path.join(rootDir, 'uploads', 'blogs'),
+    uploadDesc: path.join(rootDir, 'uploads', 'blogs', 'description'),
+    get: `${baseUrl}/uploads/blogs`,
+    getDesc: `${baseUrl}/uploads/blogs/description`
+};
+
 module.exports = {
-    categoryPath
+    categoryPath,
+    blogPath
 }
