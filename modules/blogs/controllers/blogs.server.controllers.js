@@ -57,6 +57,7 @@ const Get = async (req, res) => {
                 metaKeywords: "$metaKeywords",
                 metaTitle: "$metaTitle",
                 metaDesc: "$metaDesc",
+                publishDate: convertUTCtoLocal("$publishDate", "Asia/Kolkata"),
                 createdAt: convertUTCtoLocal("$createdAt", "Asia/Kolkata"),
                 updatedAt: convertUTCtoLocal("$updatedAt", "Asia/Kolkata"),
                 createdByUser: { $concat: [{ $arrayElemAt: ["$createdByUser.firstName", 0] }, " ", { $arrayElemAt: ["$createdByUser.lastName", 0] }] },
