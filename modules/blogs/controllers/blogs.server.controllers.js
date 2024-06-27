@@ -16,6 +16,7 @@ const Get = async (req, res) => {
     const order = req.body.order || 'desc';
     const orderBy = req.body.orderBy || 'createdAt';
     const filterByStatus = req.body.status || null;
+    const filterByType = req.body.type || null;
     const skip = page * rowsPerPage;
 
     const sortingColumn = { [orderBy]: order === 'desc' ? -1 : 1 };
@@ -26,6 +27,10 @@ const Get = async (req, res) => {
             { title: { $regex: search, $options: 'i' } },
         ]
     };
+
+    if (filterByType) {
+        matchQuery.type = filterByType;
+    }
 
     if (recordId) {
         matchQuery._id = new mongoose.Types.ObjectId(recordId);
@@ -46,14 +51,15 @@ const Get = async (req, res) => {
                 type: "$type",
                 image: "$image",
                 imageUrl: "$imageUrl",
-                categorySlug: "$categorySlug",
-                citySlug: "$citySlug",
+                category: "$category",
+                city: "$city",
                 shortDesc: "$shortDesc",
                 description: "$description",
                 tags: "$tags",
-                author: "$author",
                 source: "$source",
+                sourceUrl: "$sourceUrl",
                 status: "$status",
+                enableComments: "$enableComments",
                 metaKeywords: "$metaKeywords",
                 metaTitle: "$metaTitle",
                 metaDesc: "$metaDesc",
@@ -112,12 +118,13 @@ const Form = async (req, res) => {
             type: formData?.isNews ? "news" : "blog",
             shortDesc: formData?.shortDesc || "",
             description: formData?.description || "",
-            categorySlug: formData?.categorySlug || [],
-            citySlug: formData?.citySlug || [],
+            category: formData?.category || [],
+            city: formData?.city || [],
             tags: formData?.tags || [],
-            author: formData?.author || "",
             source: formData?.source || "",
+            sourceUrl: formData?.sourceUrl || "",
             status: formData.active ? 1 : 0,
+            enableComments: formData.enableComments ? 1 : 0,
             publishDate: new Date(formData.publishDate),
 
             metaKeywords: formData.metaKeywords,
