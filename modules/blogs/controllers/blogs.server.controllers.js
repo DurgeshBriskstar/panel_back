@@ -74,14 +74,15 @@ const Get = async (req, res) => {
         { $limit: rowsPerPage }
     ];
 
-    const totalCountPipeline = [...pipeline];
-    totalCountPipeline.pop();
-    totalCountPipeline.push({ $count: "total" });
+    // Pipeline for fetching the total count
+    let totalCountPipeline = [{ $match: matchQuery }, { $count: "total" }];
+    // Fetching the total count
     const totalCountResult = await blogModel.aggregate(totalCountPipeline);
 
     const blogList = await blogModel.aggregate(pipeline);
 
     const totalPages = Math.ceil(totalCountResult.length > 0 ? totalCountResult[0].total / rowsPerPage : 0);
+    const totalCount = totalCountResult.length > 0 ? totalCountResult[0].total : 0;
 
     const pagination = {
         totalItems: totalCountResult.length > 0 ? totalCountResult[0].total : 0,
@@ -94,7 +95,7 @@ const Get = async (req, res) => {
         res,
         true,
         200,
-        blogList,
+        { blog: blogList, count: totalCount },
         "Records fetched successfully!"
     );
 };
