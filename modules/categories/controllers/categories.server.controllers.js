@@ -16,16 +16,21 @@ const Get = async (req, res) => {
   const order = req.body.order || 'desc';
   const orderBy = req.body.orderBy || 'createdAt';
   const filterByStatus = req.body.status || null;
+  const filterByType = req.body.type || null;
   const skip = page * rowsPerPage;
 
   const sortingColumn = { [orderBy]: order === 'desc' ? -1 : 1 };
 
   let matchQuery = {
-    status: filterByStatus ? parseInt(filterByStatus) : { $ne: 2 },
+    status: filterByStatus ? parseInt(filterByStatus) : { $ne: STATUS_DELETED },
     $or: [
       { title: { $regex: search, $options: 'i' } },
     ]
   };
+
+  if (filterByType) {
+    matchQuery.type = filterByType;
+  }
 
   if (recordId) {
     matchQuery._id = new mongoose.Types.ObjectId(recordId);

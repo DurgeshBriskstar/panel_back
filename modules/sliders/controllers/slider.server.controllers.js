@@ -21,7 +21,7 @@ const Get = async (req, res) => {
   const sortingColumn = { [orderBy]: order === 'desc' ? -1 : 1 };
 
   let matchQuery = {
-    status: filterByStatus ? parseInt(filterByStatus) : { $ne: 2 },
+    status: filterByStatus ? parseInt(filterByStatus) : { $ne: STATUS_DELETED },
     $or: [
       { title: { $regex: search, $options: 'i' } },
     ]
