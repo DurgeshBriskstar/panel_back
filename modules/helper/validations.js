@@ -7,7 +7,18 @@ const categoryFormValidations = (formData = {}) => {
 
   return errors;
 };
+
 const blogFormValidations = (formData = {}) => {
+  let errors = {};
+
+  if (!formData?.title) {
+    errors.title = "Title field is required!"
+  }
+
+  return errors;
+};
+
+const sliderFormValidations = (formData = {}) => {
   let errors = {};
 
   if (!formData?.title) {
@@ -20,5 +31,6 @@ const blogFormValidations = (formData = {}) => {
 
 module.exports = {
   categoryFormValidations,
-  blogFormValidations
+  blogFormValidations,
+  sliderFormValidations
 };
