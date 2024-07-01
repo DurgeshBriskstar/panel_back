@@ -6,6 +6,7 @@ const { verifyToken } = require('./modules/helper/verifyToken');
 const authRouter = require("./modules/auth/routes/auth.server.router");
 const userRouter = require("./modules/users/routes/user.server.router");
 const categoryRouter = require("./modules/categories/routes/categories.server.router");
+const sliderRouter = require("./modules/sliders/routes/slider.server.router");
 const blogRouter = require("./modules/blogs/routes/blogs.server.router");
 
 MainRouter.use('/geolocation', async (req, res) => {
@@ -22,6 +23,7 @@ MainRouter.use('/auth', authRouter);
 
 MainRouter.use('/user', verifyToken, userRouter);
 MainRouter.use('/categories', verifyToken, categoryRouter);
+MainRouter.use('/sliders', verifyToken, sliderRouter);
 MainRouter.use('/blogs', verifyToken, blogRouter);
 
 module.exports = MainRouter;
