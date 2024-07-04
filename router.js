@@ -6,6 +6,7 @@ const { verifyToken } = require('./modules/helper/verifyToken');
 
 const authRouter = require("./modules/auth/routes/auth.server.router");
 const userRouter = require("./modules/users/routes/user.server.router");
+const webRouter = require("./modules/web/routes/web.server.router");
 const categoryRouter = require("./modules/categories/routes/categories.server.router");
 const sliderRouter = require("./modules/sliders/routes/slider.server.router");
 const blogRouter = require("./modules/blogs/routes/blogs.server.router");
@@ -24,6 +25,8 @@ MainRouter.use('/geolocation', async (req, res) => {
 
 MainRouter.use('/auth', authRouter);
 
+MainRouter.use('/web', verifyToken, webRouter);
+
 MainRouter.use('/user', verifyToken, userRouter);
 MainRouter.use('/categories', verifyToken, categoryRouter);
 MainRouter.use('/sliders', verifyToken, sliderRouter);
@@ -32,11 +35,15 @@ MainRouter.use('/blogs', verifyToken, blogRouter);
 
 // ________________________________________ WEB ________________________________________
 
+const webSiteRouter = require("./modules/web/routes/web.client.router");
 const webCategoryRouter = require("./modules/categories/routes/categories.client.router");
+const webBlogRouter = require("./modules/blogs/routes/blogs.client.router");
 // const webSliderRouter = require("./modules/sliders/routes/slider.client.router");
-// const webBlogRouter = require("./modules/blogs/routes/blogs.client.router");
 
+
+WebRouter.use('/web', webSiteRouter);
 WebRouter.use('/categories', webCategoryRouter);
+WebRouter.use('/blogs', webBlogRouter);
 
 module.exports = {
     MainRouter,

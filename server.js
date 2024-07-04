@@ -17,7 +17,7 @@ app.use('/api', MainRouter);
 
 //  ___________________________ WEB ___________________________
 
-app.use('/web', WebRouter);
+app.use('/client', WebRouter);
 
 
 
