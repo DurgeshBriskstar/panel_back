@@ -22,12 +22,21 @@ const UserInfoSchema = new mongoose.Schema({
     secondaryEmail: { type: String },
     primaryPhone: { type: String },
     secondaryPhone: { type: String },
-    streetAddress: { type: String },
-    address: { type: String },
-    city: { type: String },
-    state: { type: String },
-    pinCode: { type: String },
-    country: { type: String },
+    address: {
+        streetAddress: { type: String },
+        address: { type: String },
+        city: { type: String },
+        state: { type: String },
+        pinCode: { type: String },
+    },
+    socialLinks: {
+        facebookLink: { type: String },
+        instagramLink: { type: String },
+        linkedinLink: { type: String },
+        twitterLink: { type: String },
+        pinterestLink: { type: String },
+        youtubeLink: { type: String },
+    }
 });
 
 const UserModel = mongoose.model("users", UserSchema);

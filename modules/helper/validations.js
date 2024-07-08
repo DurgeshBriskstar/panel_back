@@ -1,3 +1,13 @@
+const userFormValidations = (formData = {}) => {
+  let errors = {};
+
+  // if (!formData?.firstName) {
+  //   errors.firstName = "Title field is required!"
+  // }
+
+  return errors;
+};
+
 const categoryFormValidations = (formData = {}) => {
   let errors = {};
 
@@ -30,6 +40,7 @@ const sliderFormValidations = (formData = {}) => {
 
 
 module.exports = {
+  userFormValidations,
   categoryFormValidations,
   blogFormValidations,
   sliderFormValidations
