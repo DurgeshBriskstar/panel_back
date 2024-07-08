@@ -22,7 +22,7 @@ const UserInfoSchema = new mongoose.Schema({
     secondaryEmail: { type: String },
     primaryPhone: { type: String },
     secondaryPhone: { type: String },
-    street: { type: String },
+    streetAddress: { type: String },
     address: { type: String },
     city: { type: String },
     state: { type: String },
