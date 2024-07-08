@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const { sendResponse } = require("../../helper/common");
+const { STATUS_ACTIVE } = require("../../helper/flags");
 const { UserModel } = require("../../users/models/users.server.models");
 const JWT_KEY = process.env.JWT_KEY;
 const { firstUserSetup } = require("../../../config/setup");
@@ -48,28 +49,40 @@ const SignUp = async (req, res) => {
 const SignIn = async (req, res) => {
     try {
         if (req?.body?.email && req?.body?.password) {
-            let user = await UserModel.find({ email: req?.body?.email });
-            if (!user.length) {
+            let user = await UserModel.findOne({ email: req?.body?.email });
+
+            if (!Object.values(user)?.length) {
                 return sendResponse(res, false, 400, {}, "Email not registered!");
             }
-            let hashed = await bcrypt.compare(req?.body?.password, user[0]?.password);
+
+            if (user?.status !== STATUS_ACTIVE) {
+                return sendResponse(res, false, 400, {}, "Your account currently inactivate, Please contact administrator!");
+            }
+            let hashed = await bcrypt.compare(req?.body?.password, user?.password);
             if (!hashed) {
                 return sendResponse(res, false, 400, {}, "Invalid password!");
             }
             else {
                 var token = jwt.sign({
-                    id: user[0]?._id,
-                    firstname: user[0]?.firstname,
-                    lastname: user[0]?.lastname,
-                    email: user[0]?.email,
-                    role: user[0]?.role,
+                    id: user?._id,
+                    firstname: user?.firstname,
+                    lastname: user?.lastname,
+                    email: user?.email,
+                    role: user?.role,
                 }, JWT_KEY, { expiresIn: "2h" });
-                let withoutPassword = user[0].toObject();
+                let withoutPassword = user.toObject();
                 delete withoutPassword.password;
                 let loggedInUser = {
                     user: withoutPassword,
                     token: token,
                 }
+
+                const record = {
+                    lastLoginAt: new Date(),
+                    loginCount: user?.loginCount ? user?.loginCount + 1 : 1,
+                };
+                await UserModel.findByIdAndUpdate(user?._id, { $set: record }, { new: true });
+
                 return sendResponse(res, true, 200, loggedInUser, "LoggedIn successfully!");
             }
         }
