@@ -38,10 +38,21 @@ const sliderFormValidations = (formData = {}) => {
   return errors;
 };
 
+const graphicFormValidations = (formData = {}) => {
+  let errors = {};
+
+  if (!formData?.title) {
+    errors.title = "Title field is required!"
+  }
+
+  return errors;
+};
+
 
 module.exports = {
   userFormValidations,
   categoryFormValidations,
   blogFormValidations,
-  sliderFormValidations
+  sliderFormValidations,
+  graphicFormValidations,
 };

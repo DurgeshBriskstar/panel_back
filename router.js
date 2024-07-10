@@ -10,6 +10,7 @@ const webRouter = require("./modules/web/routes/web.server.router");
 const categoryRouter = require("./modules/categories/routes/categories.server.router");
 const sliderRouter = require("./modules/sliders/routes/slider.server.router");
 const blogRouter = require("./modules/blogs/routes/blogs.server.router");
+const graphicRouter = require("./modules/graphics/routes/graphic.server.router");
 
 // ________________________________________ PANEL ________________________________________
 
@@ -31,6 +32,7 @@ MainRouter.use('/user', verifyToken, userRouter);
 MainRouter.use('/categories', verifyToken, categoryRouter);
 MainRouter.use('/sliders', verifyToken, sliderRouter);
 MainRouter.use('/blogs', verifyToken, blogRouter);
+MainRouter.use('/graphics', verifyToken, graphicRouter);
 
 
 // ________________________________________ WEB ________________________________________

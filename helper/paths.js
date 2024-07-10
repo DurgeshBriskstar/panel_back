@@ -20,8 +20,14 @@ const blogPath = {
     getDesc: `${baseUrl}/uploads/blogs/description`
 };
 
+const graphicPath = {
+    upload: path.join(rootDir, 'uploads', 'graphics'),
+    get: `${baseUrl}/uploads/graphics`
+};
+
 module.exports = {
     categoryPath,
     sliderPath,
-    blogPath
+    blogPath,
+    graphicPath,
 }
