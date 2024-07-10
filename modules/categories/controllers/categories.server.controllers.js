@@ -32,10 +32,6 @@ const Get = async (req, res) => {
     matchQuery.type = filterByType;
   }
 
-  if (recordId) {
-    matchQuery._id = new mongoose.Types.ObjectId(recordId);
-  }
-
   let pipeline = [
     { $match: matchQuery },
     { $match: recordId ? { _id: new mongoose.Types.ObjectId(recordId) } : {} },

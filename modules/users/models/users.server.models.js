@@ -28,6 +28,7 @@ const UserInfoSchema = new mongoose.Schema({
         city: { type: String },
         state: { type: String },
         pinCode: { type: String },
+        country: { type: String },
     },
     socialLinks: {
         facebookLink: { type: String },
