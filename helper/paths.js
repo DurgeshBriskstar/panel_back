@@ -3,6 +3,11 @@ const path = require('path');
 const rootDir = path.resolve(__dirname, '../');
 const baseUrl = process.env.BASE_URL;
 
+const userPath = {
+    upload: path.join(rootDir, 'uploads', 'users'),
+    get: `${baseUrl}/uploads/users`
+};
+
 const categoryPath = {
     upload: path.join(rootDir, 'uploads', 'categories'),
     get: `${baseUrl}/uploads/categories`
@@ -26,6 +31,7 @@ const graphicPath = {
 };
 
 module.exports = {
+    userPath,
     categoryPath,
     sliderPath,
     blogPath,

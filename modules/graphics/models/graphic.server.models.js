@@ -8,6 +8,7 @@ const graphicSchema = new mongoose.Schema(
         image: { type: String },
         imageUrl: { type: String },
         shortDesc: { type: String },
+        footerText: { type: String },
         status: { type: Number, comment: "0 Inactive, 1 Active, 2 Deleted" },
         palette: { type: Object },
 

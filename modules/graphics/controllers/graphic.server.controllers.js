@@ -46,6 +46,7 @@ const Get = async (req, res) => {
         image: "$image",
         imageUrl: "$imageUrl",
         shortDesc: "$shortDesc",
+        footerText: "$footerText",
         status: "$status",
         palette: "$palette",
         createdAt: convertUTCtoLocal("$createdAt", "Asia/Kolkata"),
@@ -100,6 +101,7 @@ const Form = async (req, res) => {
       title: formData.title,
       slug: await convertToSlug(formData.title, graphicModel, recordId),
       shortDesc: formData.shortDesc || "",
+      footerText: formData.footerText || "",
       status: formData.active ? 1 : 0,
       palette: formData.palette || {},
 

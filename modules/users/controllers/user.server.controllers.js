@@ -1,8 +1,10 @@
 const mongoose = require("mongoose");
+const path = require('path');
 const { sendResponse } = require("../../helper/common");
 const { UserModel, UserInfoModel } = require("../models/users.server.models");
 const { userFormValidations } = require("../../helper/validations");
-const { convertUTCtoLocal } = require("../../../helper/common");
+const { convertUTCtoLocal, saveFileAndContinue, ensureDirectoryExistence } = require("../../../helper/common");
+const { userPath } = require("../../../helper/paths");
 
 const basicInfo = async (req, res) => {
     try {
@@ -106,6 +108,29 @@ const updateInfo = async (req, res) => {
             } else {
                 userInfoRecord.socialLinks = formData?.socialLinks || {};
             }
+
+            if (formData?.image) {
+                const matches = formData?.image?.match(/^data:(.+);base64,(.+)$/);
+                if (matches) {
+                    const ext = matches[1].split('/')[1];
+                    const data = matches[2];
+                    const buffer = Buffer.from(data, 'base64');
+                    const imageName = `${Date.now()}.${ext}`;
+                    const imagePath = path.join(userPath.upload, imageName);
+
+                    // Ensure directory exists
+                    ensureDirectoryExistence(imagePath);
+                    const fileStatus = await saveFileAndContinue(imagePath, buffer);
+                    if (fileStatus) {
+                        userRecord.image = imageName;
+                        userRecord.imageUrl = `${userPath.get}/${imageName}`;
+                    }
+                }
+            } else {
+                userRecord.image = "";
+                userRecord.imageUrl = "";
+            }
+
 
             const userInfo = await UserInfoModel.findOneAndUpdate({ userId: recordId }, { $set: userInfoRecord }, { new: true, upsert: true });
             const user = await UserModel.findByIdAndUpdate(recordId, { $set: userRecord });
