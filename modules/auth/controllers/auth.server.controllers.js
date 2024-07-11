@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const { sendResponse } = require("../../helper/common");
 const { STATUS_ACTIVE } = require("../../helper/flags");
-const { UserModel } = require("../../users/models/users.server.models");
+const { UserModel, UserInfoModel } = require("../../users/models/users.server.models");
 const JWT_KEY = process.env.JWT_KEY;
 const { firstUserSetup } = require("../../../config/setup");
 
@@ -28,8 +28,16 @@ const SignUp = async (req, res) => {
                 "password": hashed,
                 "role": req?.body?.role,
             }
+            let userInfoRecord = {
+                country: "India",
+            };
             let saveData = new UserModel(record);
             let user = await saveData.save();
+
+            let saveInfoData = new UserInfoModel(userInfoRecord);
+            await saveInfoData.save();
+
+
             let withoutPassword = user.toObject();
             delete withoutPassword.password;
             return sendResponse(res, true, 200, withoutPassword, "User registered successfully!");
