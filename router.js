@@ -28,7 +28,7 @@ MainRouter.use('/auth', authRouter);
 
 MainRouter.use('/web', verifyToken, webRouter);
 
-MainRouter.use('/user', verifyToken, userRouter);
+MainRouter.use('/users', verifyToken, userRouter);
 MainRouter.use('/categories', verifyToken, categoryRouter);
 MainRouter.use('/sliders', verifyToken, sliderRouter);
 MainRouter.use('/blogs', verifyToken, blogRouter);

@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
 const path = require('path');
-const { sendResponse } = require("../../helper/common");
 const { UserModel, UserInfoModel } = require("../models/users.server.models");
+const { sendResponse } = require("../../helper/common");
 const { userFormValidations } = require("../../helper/validations");
+const { STATUS_DELETED, STATUS_INACTIVE, STATUS_ACTIVE } = require("../../helper/flags");
 const { convertUTCtoLocal, saveFileAndContinue, ensureDirectoryExistence } = require("../../../helper/common");
 const { userPath } = require("../../../helper/paths");
 
@@ -75,6 +76,85 @@ const fullInfo = async (req, res) => {
         return sendResponse(res, false, 400, {}, "Something went wrong, Please try again with correct credentials!");
     }
 }
+
+const Get = async (req, res) => {
+    const { id: recordId } = req.params || null;
+    const page = req.body.page || 0;
+    const rowsPerPage = req.body.rowsPerPage || 10;
+    const search = req.body.search || '';
+    const order = req.body.order || 'desc';
+    const orderBy = req.body.orderBy || 'createdAt';
+    const filterByStatus = req.body.status || null;
+    const skip = page * rowsPerPage;
+
+    const sortingColumn = { [orderBy]: order === 'desc' ? -1 : 1 };
+
+    let matchQuery = {
+        status: filterByStatus ? parseInt(filterByStatus) : { $ne: STATUS_DELETED },
+        $or: [
+            { firstName: { $regex: search, $options: 'i' } },
+        ]
+    };
+
+    let pipeline = [
+        { $match: matchQuery },
+        { $match: recordId ? { _id: new mongoose.Types.ObjectId(recordId) } : {} },
+
+        { $lookup: { from: 'user_infos', localField: '_id', foreignField: 'userId', as: 'userInfo' } },
+        { $unwind: '$userInfo' },
+        { $sort: sortingColumn },
+        {
+            $project: {
+                firstName: '$firstName',
+                lastName: '$lastName',
+                email: '$email',
+                role: '$role',
+                gender: '$gender',
+                image: '$image',
+                imageUrl: '$imageUrl',
+                status: '$status',
+                lastLoginAt: convertUTCtoLocal("$lastLoginAt", "Asia/Kolkata"),
+                loginCount: '$loginCount',
+
+
+                about: '$userInfo.about',
+                dateOfBirth: convertUTCtoLocal('$userInfo.dateOfBirth', "Asia/Kolkata"),
+                secondaryEmail: '$userInfo.secondaryEmail',
+                primaryPhone: '$userInfo.primaryPhone',
+                secondaryPhone: '$userInfo.secondaryPhone',
+                address: '$userInfo.address',
+                socialLinks: '$userInfo.socialLinks',
+            }
+        },
+        { $skip: skip },
+        { $limit: rowsPerPage }
+    ];
+
+    // Pipeline for fetching the total count
+    let totalCountPipeline = [{ $match: matchQuery }, { $count: "total" }];
+    // Fetching the total count
+    const totalCountResult = await UserModel.aggregate(totalCountPipeline);
+
+    const userList = await UserModel.aggregate(pipeline);
+
+    const totalPages = Math.ceil(totalCountResult.length > 0 ? totalCountResult[0].total / rowsPerPage : 0);
+    const totalCount = totalCountResult.length > 0 ? totalCountResult[0].total : 0;
+
+    const pagination = {
+        totalItems: totalCountResult.length > 0 ? totalCountResult[0].total : 0,
+        currentPage: page,
+        totalPages: totalPages,
+        itemsPerPage: rowsPerPage
+    }
+
+    return sendResponse(
+        res,
+        true,
+        200,
+        { user: userList, count: totalCount },
+        "Records fetched successfully!"
+    );
+};
 
 const updateInfo = async (req, res) => {
     try {
@@ -150,5 +230,6 @@ const updateInfo = async (req, res) => {
 module.exports = {
     basicInfo,
     fullInfo,
+    Get,
     updateInfo
 }
