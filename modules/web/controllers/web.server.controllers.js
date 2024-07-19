@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 const fs = require('fs');
 const path = require('path');
-const { sendResponse, convertToSlug, generateRandomUid } = require("../../helper/common");
+const { sendResponse } = require("../../helper/common");
 const { STATUS_DELETED, STATUS_INACTIVE, STATUS_ACTIVE } = require("../../helper/flags");
-const { categoryFormValidations } = require("../../helper/validations");
+const { webFormValidations } = require("../../helper/validations");
 const webModel = require("../models/web.server.models");
 const { convertUTCtoLocal, ensureDirectoryExistence, saveFileAndContinue } = require("../../../helper/common");
-const { categoryPath } = require("../../../helper/paths");
+const { websitePath } = require("../../../helper/paths");
 
 const Get = async (req, res) => {
   let pipeline = [
@@ -62,86 +62,93 @@ const Get = async (req, res) => {
   );
 };
 
-// const Form = async (req, res) => {
-//   try {
-//     if (!req?.body) return sendResponse(res, false, 400, {}, "No data provided!");
-//     const formData = req.body;
-//     const formParams = req.params;
-//     const recordId = formParams.id || new mongoose.Types.ObjectId;
-//     const newRecord = formParams.id ? false : true;
+const Form = async (req, res) => {
+  try {
+    if (!req?.body) return sendResponse(res, false, 400, {}, "No data provided!");
+    const formData = req.body;
+    const formParams = req.params;
+    const recordId = formParams.id || new mongoose.Types.ObjectId;
+    const newRecord = formParams.id ? false : true;
+    const type = formParams.type || 'general';
 
-//     let errors = categoryFormValidations(formData);
-//     if (Object.keys(errors).length) return sendResponse(res, false, 400, errors, "Validation failed!");
+    let errors = webFormValidations(formData);
+    if (Object.keys(errors).length) return sendResponse(res, false, 400, errors, "Validation failed!");
 
-//     let record = {
-//       title: formData.title,
-//       slug: await convertToSlug(formData.title, categoryModel, recordId),
-//       type: formData.isCity ? "city" : "category",
-//       showInNav: formData.showInNav || false,
-//       orderInNav: formData.orderInNav || null,
-//       shortDesc: formData.shortDesc || "",
-//       description: formData.description || "",
-//       status: formData.active ? 1 : 0,
+    let record = {};
 
-//       metaKeywords: formData.metaKeywords,
-//       metaTitle: formData.metaTitle,
-//       metaDesc: formData.metaDesc,
+    if (type === "general") {
+      record.title = formData.title;
+      record.subTitle = formData.subTitle;
+      record.category = formData.category;
+      record.aboutUs = formData.aboutUs;
+      record.primaryEmail = formData.primaryEmail;
+      record.secondaryEmail = formData.secondaryEmail;
+      record.primaryPhone = formData.primaryPhone;
+      record.secondaryPhone = formData.secondaryPhone;
+      record.whatsAppPhone = formData.whatsAppPhone;
+      record.streetAddress = formData.streetAddress;
+      record.address = formData.address;
+      record.city = formData.city;
+      record.state = formData.state;
+      record.pincode = formData.pincode;
+      record.country = formData.country;
+    } else {
+      record.socialLinks = formData?.socialLinks || {};
+    }
 
-//       updatedAt: new Date(),
-//       updatedBy: req?.user?.id,
-//     };
+    record.updatedAt = new Date();
+    record.updatedBy = req?.user?.id;
 
-//     if (formData?.image) {
-//       const matches = formData?.image?.match(/^data:(.+);base64,(.+)$/);
-//       if (matches) {
-//         const ext = matches[1].split('/')[1];
-//         const data = matches[2];
-//         const buffer = Buffer.from(data, 'base64');
-//         const imageName = `${Date.now()}.${ext}`;
-//         const imagePath = path.join(categoryPath.upload, imageName);
+    if (formData?.image) {
+      const matches = formData?.image?.match(/^data:(.+);base64,(.+)$/);
+      if (matches) {
+        const ext = matches[1].split('/')[1];
+        const data = matches[2];
+        const buffer = Buffer.from(data, 'base64');
+        const imageName = `${Date.now()}.${ext}`;
+        const imagePath = path.join(websitePath.upload, imageName);
 
-//         // Ensure directory exists
-//         ensureDirectoryExistence(imagePath);
-//         const fileStatus = await saveFileAndContinue(imagePath, buffer);
-//         if (fileStatus) {
-//           record.image = imageName;
-//           record.imageUrl = `${categoryPath.get}/${imageName}`;
-//         }
-//       }
-//     } else {
-//       record.image = "";
-//       record.imageUrl = "";
-//     }
+        // Ensure directory exists
+        ensureDirectoryExistence(imagePath);
+        const fileStatus = await saveFileAndContinue(imagePath, buffer);
+        if (fileStatus) {
+          record.logo = imageName;
+          record.logoUrl = `${websitePath.get}/${imageName}`;
+        }
+      }
+    } else {
+      record.logo = "";
+      record.logoUrl = "";
+    }
 
-//     if (newRecord) {
-//       record.uid = generateRandomUid();
-//       record.createdAt = new Date();
-//       record.createdBy = req?.user?.id;
-//     }
+    if (newRecord) {
+      record.createdAt = new Date();
+      record.createdBy = req?.user?.id;
+    }
 
-//     const query = { title: formData.title };
-//     const existingRecord = await categoryModel.findOne(query);
+    const query = { title: formData.title };
+    const existingRecord = await webModel.findOne(query);
 
-//     if (existingRecord && (existingRecord._id.toString() !== recordId)) {
-//       return sendResponse(res, false, 400, {}, "A record with the same title is already exists!");
-//     }
+    if (existingRecord && (existingRecord._id.toString() !== recordId)) {
+      return sendResponse(res, false, 400, {}, "A record with the same title is already exists!");
+    }
 
-//     const options = { new: true, upsert: true };
-//     const category = await categoryModel.findByIdAndUpdate(recordId, { $set: record }, options);
-//     const message = newRecord ? "Record saved successfully!" : "Record updated successfully!";
+    const options = { new: true, upsert: true };
+    const website = await webModel.findByIdAndUpdate(recordId, { $set: record }, options);
+    const message = newRecord ? "Record saved successfully!" : "Record updated successfully!";
 
-//     return sendResponse(res, true, 200, category, message);
-//   } catch (error) {
-//     console.log(error);
-//     const transformedObject = {};
-//     for (const key in error?.errors) {
-//       if (error?.errors.hasOwnProperty(key)) {
-//         transformedObject[key] = error?.errors[key].message;
-//       }
-//     }
-//     return sendResponse(res, false, 400, {}, transformedObject);
-//   }
-// };
+    return sendResponse(res, true, 200, website, message);
+  } catch (error) {
+    console.log(error);
+    const transformedObject = {};
+    for (const key in error?.errors) {
+      if (error?.errors.hasOwnProperty(key)) {
+        transformedObject[key] = error?.errors[key].message;
+      }
+    }
+    return sendResponse(res, false, 400, {}, transformedObject);
+  }
+};
 
 // const UpdateStatus = async (req, res) => {
 //   const recordId = req?.params?.id || null;
@@ -152,7 +159,7 @@ const Get = async (req, res) => {
 //       updatedAt: new Date(),
 //       updatedBy: req?.user?.id,
 //     };
-//     const updatedCategory = await categoryModel.findByIdAndUpdate(
+//     const updatedCategory = await webModel.findByIdAndUpdate(
 //       recordId,
 //       { $set: record },
 //       { new: true }
@@ -176,7 +183,7 @@ const Get = async (req, res) => {
 //       deletedAt: new Date(),
 //       deletedBy: req?.user?.id,
 //     };
-//     const updatedCategory = await categoryModel.findByIdAndUpdate(
+//     const updatedCategory = await webModel.findByIdAndUpdate(
 //       recordId,
 //       { $set: record },
 //       { new: true }
@@ -194,7 +201,7 @@ const Get = async (req, res) => {
 
 module.exports = {
   Get,
-  // Form,
+  Form,
   // Delete,
   // UpdateStatus,
 };

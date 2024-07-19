@@ -8,6 +8,11 @@ const userPath = {
     get: `${baseUrl}/uploads/users`
 };
 
+const websitePath = {
+    upload: path.join(rootDir, 'uploads', 'website'),
+    get: `${baseUrl}/uploads/website`
+};
+
 const categoryPath = {
     upload: path.join(rootDir, 'uploads', 'categories'),
     get: `${baseUrl}/uploads/categories`
@@ -32,6 +37,7 @@ const graphicPath = {
 
 module.exports = {
     userPath,
+    websitePath,
     categoryPath,
     sliderPath,
     blogPath,

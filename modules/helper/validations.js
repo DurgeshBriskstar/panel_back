@@ -8,6 +8,16 @@ const userFormValidations = (formData = {}) => {
   return errors;
 };
 
+const webFormValidations = (formData = {}) => {
+  let errors = {};
+
+  // if (!formData?.firstName) {
+  //   errors.firstName = "Title field is required!"
+  // }
+
+  return errors;
+};
+
 const categoryFormValidations = (formData = {}) => {
   let errors = {};
 
@@ -51,6 +61,7 @@ const graphicFormValidations = (formData = {}) => {
 
 module.exports = {
   userFormValidations,
+  webFormValidations,
   categoryFormValidations,
   blogFormValidations,
   sliderFormValidations,
